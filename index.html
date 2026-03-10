@@ -8,7 +8,10 @@
 <title>Consulta Pública Carta BIP/ZIP</title>
 
  <div id="form-container">
-  <h2>Responda algumas perguntas</h2>
+  <h2>Responda às questões do questionário e em seguida assinale um local no mapa.s</h2>
+ 
+  <h2> Envie as respostas do questionário e submeta as coordenadas indicadas no mapa</h2>
+ 
   <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true" width="1000" height="600" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
 </div> 
  
@@ -17,13 +20,13 @@
 <style>
 
 body{
-font-family:Arial;
+font-family:Times New Roman;
 margin:20px;
 }
 
 #map{
 height:500px;
-width:100%;
+width:80%;
 }
 
 button{
@@ -40,7 +43,7 @@ font-size:16px;
 
 <h2>Marque o local no mapa</h2>
 
-<p>Clique no mapa para indicar o local relevante.</p>
+<p>Clique no mapa para indicar o local a considerar.</p>
 
 <div id="map"></div>
 
@@ -50,7 +53,7 @@ font-size:16px;
 
 <br>
 
-<button onclick="enviar()">Submeter resposta</button>
+<button onclick="enviar()">Submeter coordenadas</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -97,3 +100,4 @@ alert("Coordenadas registadas: "+c);
 
 
 </html>
+
