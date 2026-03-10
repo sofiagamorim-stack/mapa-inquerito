@@ -102,28 +102,42 @@ alert("Coordenadas registadas: "+c);
 </html>
 
 <script>
-  // Substitua pelo URL do seu Web App
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLj8gg3gWJcuooo5iDktu-xS1pqpcicRa9jBkuiyKF80jY-eIhLluCdDwZYwgTLeNz/exec";
+  // URL do Web App do Google Sheets (Apps Script)
+  const WEB_APP_URL = "COLE_AQUI_O_SEU_WEB_APP_URL";
 
-  // Captura o clique no mapa
+  // Variáveis para armazenar a última coordenada clicada
+  let currentLat = null;
+  let currentLng = null;
+
+  // Captura o clique no mapa, mas só guarda as coordenadas
   map.on('click', function(e) {
-    let lat = e.latlng.lat.toFixed(6);
-    let lng = e.latlng.lng.toFixed(6);
+      currentLat = e.latlng.lat.toFixed(6);
+      currentLng = e.latlng.lng.toFixed(6);
+      alert("Coordenadas selecionadas:\nLat: " + currentLat + "\nLng: " + currentLng);
+  });
 
-    // Monta URL com parâmetros
-    let url = `${WEB_APP_URL}?lat=${lat}&lng=${lng}`;
+  // Envia coordenadas quando o botão for clicado
+  document.getElementById("submit-coords").addEventListener("click", function() {
+      if(currentLat === null || currentLng === null){
+          alert("Por favor, selecione um ponto no mapa antes de submeter.");
+          return;
+      }
 
-    // Envia coordenadas para a planilha
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        console.log(data); // Feedback no console
-        alert("Coordenadas enviadas com sucesso!");
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Erro ao enviar coordenadas.");
-      });
+      const url = `${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`;
+
+      fetch(url)
+        .then(response => response.text())
+        .then(data => {
+          alert("Coordenadas enviadas com sucesso!");
+          console.log(data);
+          // Limpa as coordenadas armazenadas, se quiser
+          currentLat = null;
+          currentLng = null;
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Erro ao enviar coordenadas. Tente novamente.");
+        });
   });
 </script>
 
