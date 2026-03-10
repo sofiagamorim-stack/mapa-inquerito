@@ -1,142 +1,100 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt">
 <head>
+  <meta charset="UTF-8">
+  <title>Mapa Interativo - Envio de Coordenadas</title>
 
-<meta charset="utf-8">
-
-<title>Consulta Pública Carta BIP/ZIP</title>
-
- <div id="form-container">
-  <h2>Responda às questões do questionário e em seguida assinale um local no mapa.</h2>
- 
-  <h2> Envie as respostas do questionário e submeta as coordenadas indicadas no mapa</h2>
- 
-  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true" width="1000" height="600" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
-</div> 
- 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<style>
-
-body{
-font-family:Times New Roman;
-margin:20px;
-}
-
-#map{
-height:500px;
-width:60%;
-}
-
-button{
-margin-top:10px;
-padding:10px;
-font-size:16px;
-}
-
-</style>
-
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css"
+    integrity="sha256-sA+e2l5xY1vL7k+d3j9RnFxkU2F2eoE2Q7hK9F0hRE4=" crossorigin=""/>
+  
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #map { height: 80vh; width: 100%; }
+    #controls { padding: 10px; text-align: center; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  </style>
 </head>
-
 <body>
 
-<h2>Assinale o local a considerar no mapa</h2>
+  <div id="map"></div>
 
-<p>Clique no mapa para indicar o local a considerar.</p>
+  <div id="controls">
+    <button id="submit-coords">Submeter coordenadas</button>
+  </div>
 
-<div id="map"></div>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"
+    integrity="sha256-QV0F7RnJt5NQXbd0V+2xA7G3bN0YyOYtzrJZgOAI2S4=" crossorigin=""></script>
 
-<p>Coordenadas selecionadas:</p>
+  <script>
+    // ==============================
+    // CONFIGURAÇÃO
+    // ==============================
+    // Substitua pelo URL do seu Web App do Google Apps Script
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxyQpcR_Jof_OW02aarSo4Y4BfLvg-x3G7W_ZEzjUDkj0bH7Bspf_mecKWSzxxUdY/exec";
 
-<input id="coords" type="text" readonly style="width:300px">
+    let currentLat = null;
+    let currentLng = null;
 
-<br>
+    // ==============================
+    // INICIALIZAÇÃO DO MAPA
+    // ==============================
+    const map = L.map('map').setView([38.716, -9.140], 13); // Coordenadas de Lisboa como padrão
 
-<button onclick="enviar()">Submeter coordenadas</button>
- <button id="submit-coords">Submeter coordenadas</button>
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    let marker = null;
 
-<script>
-
-var map = L.map('map').setView([38.7223,-9.1393],12);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
- attribution:'© OpenStreetMap'
-}).addTo(map);
-
-var marker;
-
-map.on('click',function(e){
-
-if(marker){
-map.removeLayer(marker);
-}
-
-marker = L.marker(e.latlng).addTo(map);
-
-var coords = e.latlng.lat.toFixed(6)+","+e.latlng.lng.toFixed(6);
-
-document.getElementById("coords").value = coords;
-
-});
-
-function enviar(){
-
-var c = document.getElementById("coords").value;
-
-if(c==""){
-alert("Selecione um ponto no mapa");
-return;
-}
-
-alert("Coordenadas registadas: "+c);
-
-}
-
-</script>
-
-</body>
-
-
-</html>
-
-<script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxyQpcR_Jof_OW02aarSo4Y4BfLvg-x3G7W_ZEzjUDkj0bH7Bspf_mecKWSzxxUdY/exec";
-
-  let currentLat = null;
-  let currentLng = null;
-
-  // Captura o clique no mapa
-  map.on('click', function(e) {
+    // ==============================
+    // CAPTURA DO CLIQUE NO MAPA
+    // ==============================
+    map.on('click', function(e) {
       currentLat = e.latlng.lat.toFixed(6);
       currentLng = e.latlng.lng.toFixed(6);
-      alert("Coordenadas selecionadas:\nLat: " + currentLat + "\nLng: " + currentLng);
-  });
 
-  // Envio ao clicar no botão
-  document.getElementById("submit-coords").addEventListener("click", function() {
-      if(currentLat === null || currentLng === null){
-          alert("Por favor, selecione um ponto no mapa antes de submeter.");
-          return;
+      // Remove marcador anterior
+      if(marker) map.removeLayer(marker);
+
+      // Adiciona novo marcador
+      marker = L.marker([currentLat, currentLng]).addTo(map);
+
+      alert("Coordenadas selecionadas:\nLat: " + currentLat + "\nLng: " + currentLng);
+    });
+
+    // ==============================
+    // ENVIO DAS COORDENADAS
+    // ==============================
+    document.getElementById("submit-coords").addEventListener("click", function() {
+      if(currentLat === null || currentLng === null) {
+        alert("Por favor, selecione um ponto no mapa antes de submeter.");
+        return;
       }
 
-      fetch(`${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`)
+      const url = `${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`;
+
+      fetch(url)
         .then(response => response.text())
         .then(data => {
           alert("Coordenadas enviadas com sucesso!");
           console.log(data);
+          // Limpa variáveis e marcador
           currentLat = null;
           currentLng = null;
+          if(marker) map.removeLayer(marker);
         })
         .catch(err => {
           console.error(err);
-          alert("Erro ao enviar coordenadas.");
+          alert("Erro ao enviar coordenadas. Tente novamente.");
         });
-  });
-</script>
+    });
+  </script>
 
+</body>
+</html>
 
 
 
