@@ -101,4 +101,31 @@ alert("Coordenadas registadas: "+c);
 
 </html>
 
+<script>
+  // Substitua pelo URL do seu Web App
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLj8gg3gWJcuooo5iDktu-xS1pqpcicRa9jBkuiyKF80jY-eIhLluCdDwZYwgTLeNz/exec";
+
+  // Captura o clique no mapa
+  map.on('click', function(e) {
+    let lat = e.latlng.lat.toFixed(6);
+    let lng = e.latlng.lng.toFixed(6);
+
+    // Monta URL com parâmetros
+    let url = `${WEB_APP_URL}?lat=${lat}&lng=${lng}`;
+
+    // Envia coordenadas para a planilha
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        console.log(data); // Feedback no console
+        alert("Coordenadas enviadas com sucesso!");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erro ao enviar coordenadas.");
+      });
+  });
+</script>
+
+
 
