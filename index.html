@@ -54,6 +54,7 @@ font-size:16px;
 <br>
 
 <button onclick="enviar()">Submeter coordenadas</button>
+ <button id="submit-coords">Submeter coordenadas</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -102,44 +103,40 @@ alert("Coordenadas registadas: "+c);
 </html>
 
 <script>
-  // URL do Web App do Google Sheets (Apps Script)
-  const WEB_APP_URL = "COLE_AQUI_O_SEU_WEB_APP_URL";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxyQpcR_Jof_OW02aarSo4Y4BfLvg-x3G7W_ZEzjUDkj0bH7Bspf_mecKWSzxxUdY/exec";
 
-  // Variáveis para armazenar a última coordenada clicada
   let currentLat = null;
   let currentLng = null;
 
-  // Captura o clique no mapa, mas só guarda as coordenadas
+  // Captura o clique no mapa
   map.on('click', function(e) {
       currentLat = e.latlng.lat.toFixed(6);
       currentLng = e.latlng.lng.toFixed(6);
       alert("Coordenadas selecionadas:\nLat: " + currentLat + "\nLng: " + currentLng);
   });
 
-  // Envia coordenadas quando o botão for clicado
+  // Envio ao clicar no botão
   document.getElementById("submit-coords").addEventListener("click", function() {
       if(currentLat === null || currentLng === null){
           alert("Por favor, selecione um ponto no mapa antes de submeter.");
           return;
       }
 
-      const url = `${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`;
-
-      fetch(url)
+      fetch(`${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`)
         .then(response => response.text())
         .then(data => {
           alert("Coordenadas enviadas com sucesso!");
           console.log(data);
-          // Limpa as coordenadas armazenadas, se quiser
           currentLat = null;
           currentLng = null;
         })
         .catch(err => {
           console.error(err);
-          alert("Erro ao enviar coordenadas. Tente novamente.");
+          alert("Erro ao enviar coordenadas.");
         });
   });
 </script>
+
 
 
 
