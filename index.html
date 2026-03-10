@@ -1,122 +1,99 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 
 <head>
-
 <meta charset="utf-8">
-
 <title>Consulta Pública Carta BIP/ZIP</title>
 
- <div id="form-container">
-  <h2>Responda às questões do questionário e em seguida assinale um local no mapa.</h2>
- 
-  <h2> Envie as respostas do questionário e submeta as coordenadas indicadas no mapa</h2>
- 
-  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true" width="1000" height="600" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
-</div> 
- 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-
-body{
-font-family:Times New Roman;
-margin:20px;
+body {
+  font-family: Times New Roman;
+  margin: 20px;
 }
 
-#map{
-height:500px;
-width:60%;
+#map {
+  height: 500px;
+  width: 60%;
+  margin-bottom: 10px;
 }
 
-button{
-margin-top:10px;
-padding:10px;
-font-size:16px;
+button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
 }
 
+#coords {
+  width: 300px;
+  margin-top: 5px;
+}
 </style>
 
 </head>
 
 <body>
 
-<h2>Assinale o local a considerar no mapa</h2>
+<div id="form-container">
+  <h2>Responda às questões do questionário e em seguida assinale um local no mapa.</h2>
+  <h2>Envie as respostas do questionário e submeta as coordenadas indicadas no mapa</h2>
+  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true" 
+          width="1000" height="600" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
+</div> 
 
+<h2>Assinale o local a considerar no mapa</h2>
 <p>Clique no mapa para indicar o local a considerar.</p>
 
 <div id="map"></div>
 
 <p>Coordenadas selecionadas:</p>
-
-<input id="coords" type="text" readonly style="width:300px">
+<input id="coords" type="text" readonly>
 
 <br>
-
-<button onclick="enviar()">Submeter coordenadas</button>
- <button id="submit-coords">Submeter coordenadas</button>
+<button id="submit-coords">Submeter coordenadas</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+  // =======================
+  // Configurações do mapa
+  // =======================
+  var map = L.map('map').setView([38.7223,-9.1393],12);
 
-var map = L.map('map').setView([38.7223,-9.1393],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
- attribution:'© OpenStreetMap'
-}).addTo(map);
-
-var marker;
-
-map.on('click',function(e){
-
-if(marker){
-map.removeLayer(marker);
-}
-
-marker = L.marker(e.latlng).addTo(map);
-
-var coords = e.latlng.lat.toFixed(6)+","+e.latlng.lng.toFixed(6);
-
-document.getElementById("coords").value = coords;
-
-});
-
-function enviar(){
-
-var c = document.getElementById("coords").value;
-
-if(c==""){
-alert("Selecione um ponto no mapa");
-return;
-}
-
-alert("Coordenadas registadas: "+c);
-
-}
-
-</script>
-
-</body>
-
-
-</html>
-
-<script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxyQpcR_Jof_OW02aarSo4Y4BfLvg-x3G7W_ZEzjUDkj0bH7Bspf_mecKWSzxxUdY/exec";
-
+  var marker;
   let currentLat = null;
   let currentLng = null;
 
-  // Captura o clique no mapa
+  // =======================
+  // Captura clique no mapa
+  // =======================
   map.on('click', function(e) {
+      // Remove marcador anterior
+      if(marker){
+          map.removeLayer(marker);
+      }
+
+      // Adiciona novo marcador
+      marker = L.marker(e.latlng).addTo(map);
+
+      // Atualiza variáveis
       currentLat = e.latlng.lat.toFixed(6);
       currentLng = e.latlng.lng.toFixed(6);
-      alert("Coordenadas selecionadas:\nLat: " + currentLat + "\nLng: " + currentLng);
+
+      // Mostra no campo de texto
+      document.getElementById("coords").value = currentLat + "," + currentLng;
   });
 
+  // =======================
   // Envio ao clicar no botão
+  // =======================
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxyQpcR_Jof_OW02aarSo4Y4BfLvg-x3G7W_ZEzjUDkj0bH7Bspf_mecKWSzxxUdY/exec";
+
   document.getElementById("submit-coords").addEventListener("click", function() {
       if(currentLat === null || currentLng === null){
           alert("Por favor, selecione um ponto no mapa antes de submeter.");
@@ -128,15 +105,24 @@ alert("Coordenadas registadas: "+c);
         .then(data => {
           alert("Coordenadas enviadas com sucesso!");
           console.log(data);
+
+          // Limpa o marcador e campo
+          if(marker) map.removeLayer(marker);
+          document.getElementById("coords").value = "";
           currentLat = null;
           currentLng = null;
         })
         .catch(err => {
           console.error(err);
-          alert("Erro ao enviar coordenadas.");
+          alert("Erro ao enviar coordenadas. Tente novamente.");
         });
   });
+
 </script>
+
+</body>
+</html>
+
 
 
 
