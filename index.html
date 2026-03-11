@@ -8,34 +8,18 @@
 body { font-family: Times New Roman; margin:20px; }
 #map { height:500px; width:60%; margin-bottom:10px; }
 #coords { width:300px; margin-top:5px; }
-form { width:1000px; margin-bottom:20px; }
-input, textarea { width:100%; padding:6px; margin:6px 0; font-size:16px; }
-button { margin-top:10px; padding:10px; font-size:16px; }
+iframe { width:1000px; height:600px; border:0; }
 #message { margin-top:5px; color:green; font-style:italic; }
 </style>
 </head>
 <body>
 
-<h2>Responda às questões do questionário</h2>
+<h2>Responda ao questionário</h2>
 
-<form id="myForm">
-  <label>Nome:</label>
-  <input type="text" name="nome" required>
-
-  <label>Email:</label>
-  <input type="email" name="email" required>
-
-  <label>Comentário:</label>
-  <textarea name="comentario" rows="4"></textarea>
-
-  <label>Latitude:</label>
-  <input type="text" id="latField" name="latitude" readonly required>
-
-  <label>Longitude:</label>
-  <input type="text" id="lngField" name="longitude" readonly required>
-
-  <button type="submit">Enviar Formulário</button>
-</form>
+<iframe id="googleForm"
+src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true">
+A carregar…
+</iframe>
 
 <div id="message"></div>
 
@@ -43,18 +27,28 @@ button { margin-top:10px; padding:10px; font-size:16px; }
 <p>Clique no mapa para indicar o local.</p>
 
 <div id="map"></div>
+
 <p>Coordenadas selecionadas:</p>
 <input id="coords" type="text" readonly>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-var map = L.map('map').setView([38.7223,-9.1393],12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+// =======================
+// CONFIGURAÇÃO DO MAPA
+// =======================
+var map = L.map('map').setView([38.7223, -9.1393], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
  attribution:'© OpenStreetMap'
 }).addTo(map);
 
-var marker, lat=null, lng=null;
+var marker;
+var lat = null;
+var lng = null;
 
+// =======================
+// CLIQUE NO MAPA
+// =======================
 map.on('click', function(e){
   if(marker) map.removeLayer(marker);
   marker = L.marker(e.latlng).addTo(map);
@@ -62,45 +56,25 @@ map.on('click', function(e){
   lat = e.latlng.lat.toFixed(6);
   lng = e.latlng.lng.toFixed(6);
 
-  document.getElementById("coords").value = lat+","+lng;
-  document.getElementById("latField").value = lat;
-  document.getElementById("lngField").value = lng;
+  document.getElementById("coords").value = lat + "," + lng;
 
-  document.getElementById("message").textContent = "Coordenadas selecionadas automaticamente!";
-});
+  // =======================
+  // ATUALIZAR FORMULÁRIO AUTOMATICAMENTE
+  // =======================
+  var baseFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?usp=pp_url";
+  
+  // IDs obtidos via link de pré-preenchimento
+  var prefillURL = baseFormURL + "&entry.1024839152=" + lat + "&entry.53677719=" + lng;
 
-// =======================
-// ENVIO PARA GOOGLE SHEETS
-// =======================
-document.getElementById("myForm").addEventListener("submit", function(e){
-  e.preventDefault();
+  document.getElementById("googleForm").src = prefillURL;
 
-  var formData = new FormData(this);
-
-  fetch("https://script.google.com/macros/s/AKfycbwQ-Dz6KUTHPEgFvRjPMlQkn5kTWx8luGIUKCTZpkVeoxE1_oVL5NDkSf66lTP_E2Sg/exec", { // Substitua pelo link do Apps Script
-    method: "POST",
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if(data.result === "success") {
-      document.getElementById("message").textContent = "Formulário enviado com sucesso!";
-      this.reset();
-      document.getElementById("coords").value = "";
-      if(marker) map.removeLayer(marker);
-      lat=null; lng=null;
-    } else {
-      document.getElementById("message").textContent = "Erro ao enviar formulário.";
-    }
-  })
-  .catch(err => {
-    console.error(err);
-    document.getElementById("message").textContent = "Erro ao enviar formulário.";
-  });
+  document.getElementById("message").textContent = "Coordenadas preenchidas automaticamente no formulário!";
 });
 </script>
+
 </body>
 </html>
+
 
 
 
