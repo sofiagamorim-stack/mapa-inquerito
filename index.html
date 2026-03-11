@@ -1,120 +1,104 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
 <meta charset="utf-8">
 <title>Consulta Pública Carta BIP/ZIP</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
 <style>
-
-body{
-font-family:Times New Roman;
-margin:20px;
-}
-
-#map{
-height:500px;
-width:60%;
-margin-bottom:10px;
-}
-
-#coords{
-width:300px;
-margin-top:5px;
-}
-
-iframe{
-width:1000px;
-height:600px;
-border:0;
-}
-
+body { font-family: Times New Roman; margin:20px; }
+#map { height:500px; width:60%; margin-bottom:10px; }
+#coords { width:300px; margin-top:5px; }
+form { width:1000px; margin-bottom:20px; }
+input, textarea { width:100%; padding:6px; margin:6px 0; font-size:16px; }
+button { margin-top:10px; padding:10px; font-size:16px; }
+#message { margin-top:5px; color:green; font-style:italic; }
 </style>
-
 </head>
-
 <body>
 
-<div id="form-container">
+<h2>Responda às questões do questionário</h2>
 
-<h2>Responda às questões do questionário.</h2>
+<form id="myForm">
+  <label>Nome:</label>
+  <input type="text" name="nome" required>
 
-<h2>No final assinale no mapa o local a considerar.</h2>
+  <label>Email:</label>
+  <input type="email" name="email" required>
 
-<iframe
-id="googleForm"
-src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true">
-A carregar…
-</iframe>
+  <label>Comentário:</label>
+  <textarea name="comentario" rows="4"></textarea>
 
-</div>
+  <label>Latitude:</label>
+  <input type="text" id="latField" name="latitude" readonly required>
 
+  <label>Longitude:</label>
+  <input type="text" id="lngField" name="longitude" readonly required>
+
+  <button type="submit">Enviar Formulário</button>
+</form>
+
+<div id="message"></div>
 
 <h2>Assinale o local a considerar no mapa</h2>
-
 <p>Clique no mapa para indicar o local.</p>
 
 <div id="map"></div>
-
 <p>Coordenadas selecionadas:</p>
-
 <input id="coords" type="text" readonly>
 
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-
-// =======================
-// MAPA
-// =======================
-
 var map = L.map('map').setView([38.7223,-9.1393],12);
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
  attribution:'© OpenStreetMap'
 }).addTo(map);
 
-var marker;
-var lat=null;
-var lng=null;
+var marker, lat=null, lng=null;
 
+map.on('click', function(e){
+  if(marker) map.removeLayer(marker);
+  marker = L.marker(e.latlng).addTo(map);
 
-// =======================
-// CLIQUE NO MAPA
-// =======================
+  lat = e.latlng.lat.toFixed(6);
+  lng = e.latlng.lng.toFixed(6);
 
-map.on('click',function(e){
+  document.getElementById("coords").value = lat+","+lng;
+  document.getElementById("latField").value = lat;
+  document.getElementById("lngField").value = lng;
 
- if(marker){
-   map.removeLayer(marker);
- }
-
- marker = L.marker(e.latlng).addTo(map);
-
- lat = e.latlng.lat.toFixed(6);
- lng = e.latlng.lng.toFixed(6);
-
- document.getElementById("coords").value = lat + "," + lng;
-
-
- // =======================
- // ATUALIZAR FORMULÁRIO AUTOMATICAMENTE
- // =======================
-
- var formURL =
- "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"+
- "&entry.1024839152="+lat+
- "&entry.53677719="+lng;
-
- document.getElementById("googleForm").src=formURL;
-
+  document.getElementById("message").textContent = "Coordenadas selecionadas automaticamente!";
 });
 
-</script>
+// =======================
+// ENVIO PARA GOOGLE SHEETS
+// =======================
+document.getElementById("myForm").addEventListener("submit", function(e){
+  e.preventDefault();
 
+  var formData = new FormData(this);
+
+  fetch("https://script.google.com/macros/s/AKfycbwQ-Dz6KUTHPEgFvRjPMlQkn5kTWx8luGIUKCTZpkVeoxE1_oVL5NDkSf66lTP_E2Sg/exec", { // Substitua pelo link do Apps Script
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.result === "success") {
+      document.getElementById("message").textContent = "Formulário enviado com sucesso!";
+      this.reset();
+      document.getElementById("coords").value = "";
+      if(marker) map.removeLayer(marker);
+      lat=null; lng=null;
+    } else {
+      document.getElementById("message").textContent = "Erro ao enviar formulário.";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("message").textContent = "Erro ao enviar formulário.";
+  });
+});
+</script>
 </body>
 </html>
 
