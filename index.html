@@ -121,20 +121,20 @@ document.getElementById("update-form").addEventListener("click",function(){
  }
 
  var formURL =
- "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"+
+ "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?usp=pp_url"+
  "&entry.1024839152="+lat+
  "&entry.53677719="+lng;
 
- document.getElementById("googleForm").src=formURL;
+ window.open(formURL, "_blank");
 
- alert("Coordenadas inseridas no formulário. Agora pode submeter o questionário.");
-
+});
 });
 
 </script>
 
 </body>
 </html>
+
 
 
 
