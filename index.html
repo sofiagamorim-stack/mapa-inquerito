@@ -8,115 +8,154 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body {
-  font-family: Times New Roman;
-  margin: 20px;
+
+body{
+  font-family: "Times New Roman";
+  margin:20px;
 }
 
-#map {
-  height: 500px;
-  width: 60%;
-  margin-bottom: 10px;
+#map{
+  height:500px;
+  width:60%;
+  margin-bottom:10px;
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px;
-  font-size: 16px;
+#coords{
+  width:300px;
 }
 
-#coords {
-  width: 300px;
-  margin-top: 5px;
+button{
+  margin-top:10px;
+  padding:10px;
+  font-size:16px;
+  cursor:pointer;
 }
+
 </style>
 
 </head>
 
 <body>
 
-<div id="form-container">
-  <h2>Responda às questões do questionário e em seguida assinale um local no mapa.</h2>
-  <h2>Envie as respostas do questionário e submeta as coordenadas indicadas no mapa</h2>
-  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true" 
-          width="1000" height="600" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>
-</div> 
+<h2>Consulta Pública Carta BIP/ZIP</h2>
 
-<h2>Assinale o local a considerar no mapa</h2>
+<div id="form-container">
+
+<h3>1. Responda ao questionário</h3>
+
+<iframe
+src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"
+width="1000"
+height="600"
+frameborder="0">
+A carregar…
+</iframe>
+
+</div>
+
+<hr>
+
+<h3>2. Assinale um local no mapa</h3>
+
 <p>Clique no mapa para indicar o local a considerar.</p>
 
 <div id="map"></div>
 
-<p>Coordenadas selecionadas:</p>
+<p><b>Coordenadas selecionadas:</b></p>
+
 <input id="coords" type="text" readonly>
 
 <br>
+
 <button id="submit-coords">Submeter coordenadas</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // =======================
-  // Configurações do mapa
-  // =======================
-  var map = L.map('map').setView([38.7223,-9.1393],12);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
+// =============================
+// MAPA
+// =============================
 
-  var marker;
-  let currentLat = null;
-  let currentLng = null;
+var map = L.map('map').setView([38.7223,-9.1393],12);
 
-  // =======================
-  // Captura clique no mapa
-  // =======================
-  map.on('click', function(e) {
-      // Remove marcador anterior
-      if(marker){
-          map.removeLayer(marker);
-      }
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+ attribution:'© OpenStreetMap'
+}).addTo(map);
 
-      // Adiciona novo marcador
-      marker = L.marker(e.latlng).addTo(map);
+var marker;
 
-      // Atualiza variáveis
-      currentLat = e.latlng.lat.toFixed(6);
-      currentLng = e.latlng.lng.toFixed(6);
+let currentLat = null;
+let currentLng = null;
 
-      // Mostra no campo de texto
-      document.getElementById("coords").value = currentLat + "," + currentLng;
+
+// =============================
+// CLIQUE NO MAPA
+// =============================
+
+map.on('click',function(e){
+
+  if(marker){
+    map.removeLayer(marker);
+  }
+
+  marker = L.marker(e.latlng).addTo(map);
+
+  currentLat = e.latlng.lat.toFixed(6);
+  currentLng = e.latlng.lng.toFixed(6);
+
+  document.getElementById("coords").value =
+  currentLat + "," + currentLng;
+
+});
+
+
+// =============================
+// ENVIO DAS COORDENADAS
+// =============================
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbxa6qdGCHW-vEvQEb2YCXKLXP8SjV28Cqpkm7ZuARbUgYwoxeMrkO9rGfnGs0gzuP4V/exec";
+
+
+document.getElementById("submit-coords").addEventListener("click",function(){
+
+  if(currentLat === null || currentLng === null){
+    alert("Selecione um ponto no mapa primeiro.");
+    return;
+  }
+
+  fetch(WEB_APP_URL + "?lat=" + currentLat + "&lng=" + currentLng)
+
+  .then(response => response.text())
+
+  .then(data => {
+
+    alert("Coordenadas enviadas com sucesso!");
+
+    console.log(data);
+
+    // limpar marcador
+    if(marker){
+      map.removeLayer(marker);
+    }
+
+    document.getElementById("coords").value="";
+
+    currentLat=null;
+    currentLng=null;
+
+  })
+
+  .catch(error => {
+
+    console.error(error);
+
+    alert("Erro ao enviar coordenadas.");
+
   });
 
-  // =======================
-  // Envio ao clicar no botão
-  // =======================
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxa6qdGCHW-vEvQEb2YCXKLXP8SjV28Cqpkm7ZuARbUgYwoxeMrkO9rGfnGs0gzuP4V/exec";
-
-  document.getElementById("submit-coords").addEventListener("click", function() {
-      if(currentLat === null || currentLng === null){
-          alert("Por favor, selecione um ponto no mapa antes de submeter.");
-          return;
-      }
-
-      fetch(`${WEB_APP_URL}?lat=${currentLat}&lng=${currentLng}`)
-        .then(response => response.text())
-        .then(data => {
-          alert("Coordenadas enviadas com sucesso!");
-          console.log(data);
-
-          // Limpa o marcador e campo
-          if(marker) map.removeLayer(marker);
-          document.getElementById("coords").value = "";
-          currentLat = null;
-          currentLng = null;
-        })
-        .catch(err => {
-          console.error(err);
-          alert("Erro ao enviar coordenadas. Tente novamente.");
-        });
-  });
+});
 
 </script>
 
