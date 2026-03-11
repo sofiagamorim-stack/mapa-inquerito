@@ -10,25 +10,25 @@
 <style>
 
 body{
-  font-family: "Times New Roman";
-  margin:20px;
+font-family:Times New Roman;
+margin:20px;
 }
 
 #map{
-  height:500px;
-  width:60%;
-  margin-bottom:10px;
+height:500px;
+width:60%;
+margin-bottom:10px;
 }
 
 #coords{
-  width:300px;
+width:300px;
+margin-top:5px;
 }
 
 button{
-  margin-top:10px;
-  padding:10px;
-  font-size:16px;
-  cursor:pointer;
+margin-top:10px;
+padding:10px;
+font-size:16px;
 }
 
 </style>
@@ -37,13 +37,14 @@ button{
 
 <body>
 
-<h2>Consulta Pública Carta BIP/ZIP</h2>
-
 <div id="form-container">
 
-<h3>1. Responda ao questionário</h3>
+<h2>Responda às questões do questionário e em seguida assinale um local no mapa.</h2>
+
+<h2>Depois clique em "Atualizar formulário com coordenadas" e envie o questionário.</h2>
 
 <iframe
+id="googleForm"
 src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"
 width="1000"
 height="600"
@@ -53,29 +54,29 @@ A carregar…
 
 </div>
 
-<hr>
 
-<h3>2. Assinale um local no mapa</h3>
+<h2>Assinale o local a considerar no mapa</h2>
 
-<p>Clique no mapa para indicar o local a considerar.</p>
+<p>Clique no mapa para indicar o local.</p>
 
 <div id="map"></div>
 
-<p><b>Coordenadas selecionadas:</b></p>
+<p>Coordenadas selecionadas:</p>
 
 <input id="coords" type="text" readonly>
 
 <br>
 
-<button id="submit-coords">Submeter coordenadas</button>
+<button id="update-form">Atualizar formulário com coordenadas</button>
+
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-// =============================
+// =======================
 // MAPA
-// =============================
+// =======================
 
 var map = L.map('map').setView([38.7223,-9.1393],12);
 
@@ -84,76 +85,49 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 
 var marker;
+var lat=null;
+var lng=null;
 
-let currentLat = null;
-let currentLng = null;
 
-
-// =============================
+// =======================
 // CLIQUE NO MAPA
-// =============================
+// =======================
 
 map.on('click',function(e){
 
-  if(marker){
-    map.removeLayer(marker);
-  }
+ if(marker){
+   map.removeLayer(marker);
+ }
 
-  marker = L.marker(e.latlng).addTo(map);
+ marker = L.marker(e.latlng).addTo(map);
 
-  currentLat = e.latlng.lat.toFixed(6);
-  currentLng = e.latlng.lng.toFixed(6);
+ lat = e.latlng.lat.toFixed(6);
+ lng = e.latlng.lng.toFixed(6);
 
-  document.getElementById("coords").value =
-  currentLat + "," + currentLng;
+ document.getElementById("coords").value = lat + "," + lng;
 
 });
 
 
-// =============================
-// ENVIO DAS COORDENADAS
-// =============================
+// =======================
+// ATUALIZAR FORMULÁRIO
+// =======================
 
-const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbxa6qdGCHW-vEvQEb2YCXKLXP8SjV28Cqpkm7ZuARbUgYwoxeMrkO9rGfnGs0gzuP4V/exec";
+document.getElementById("update-form").addEventListener("click",function(){
 
+ if(lat==null || lng==null){
+   alert("Selecione um ponto no mapa primeiro.");
+   return;
+ }
 
-document.getElementById("submit-coords").addEventListener("click",function(){
+ var formURL =
+ "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"+
+ "&entry.1024839152="+lat+
+ "&entry.53677719="+lng;
 
-  if(currentLat === null || currentLng === null){
-    alert("Selecione um ponto no mapa primeiro.");
-    return;
-  }
+ document.getElementById("googleForm").src=formURL;
 
-  fetch(WEB_APP_URL + "?lat=" + currentLat + "&lng=" + currentLng)
-
-  .then(response => response.text())
-
-  .then(data => {
-
-    alert("Coordenadas enviadas com sucesso!");
-
-    console.log(data);
-
-    // limpar marcador
-    if(marker){
-      map.removeLayer(marker);
-    }
-
-    document.getElementById("coords").value="";
-
-    currentLat=null;
-    currentLng=null;
-
-  })
-
-  .catch(error => {
-
-    console.error(error);
-
-    alert("Erro ao enviar coordenadas.");
-
-  });
+ alert("Coordenadas inseridas no formulário. Agora pode submeter o questionário.");
 
 });
 
@@ -161,6 +135,7 @@ document.getElementById("submit-coords").addEventListener("click",function(){
 
 </body>
 </html>
+
 
 
 
