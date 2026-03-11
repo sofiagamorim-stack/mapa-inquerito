@@ -8,108 +8,111 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body {
-  font-family: Times New Roman;
-  margin: 20px;
+
+body{
+font-family:Times New Roman;
+margin:20px;
 }
 
-#map {
-  height: 500px;
-  width: 60%;
-  margin-bottom: 10px;
+#map{
+height:500px;
+width:60%;
+margin-bottom:10px;
 }
 
-#coords {
-  width: 300px;
-  margin-top: 5px;
+#coords{
+width:300px;
+margin-top:5px;
 }
 
-#form-container {
-  max-width: 1000px;
-  margin-top: 20px;
-  overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.5s ease;
-  max-height: 0;
-  opacity: 0;
+iframe{
+width:1000px;
+height:600px;
+border:0;
 }
 
-#form-container.show {
-  max-height: 1000px; /* suficiente para o iframe */
-  opacity: 1;
-}
-
-iframe {
-  width: 100%;
-  height: 600px;
-  border: 0;
-}
 </style>
 
 </head>
 
 <body>
 
+<div id="form-container">
+
+<h2>Responda às questões do questionário.</h2>
+
+<h2>No final assinale no mapa o local a considerar.</h2>
+
+<iframe
+id="googleForm"
+src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true">
+A carregar…
+</iframe>
+
+</div>
+
+
 <h2>Assinale o local a considerar no mapa</h2>
+
 <p>Clique no mapa para indicar o local.</p>
 
 <div id="map"></div>
 
 <p>Coordenadas selecionadas:</p>
+
 <input id="coords" type="text" readonly>
 
-<div id="form-container">
-  <h2>Formulário com coordenadas preenchidas</h2>
-  <iframe id="googleForm" src="">
-    A carregar…
-  </iframe>
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+
 // =======================
 // MAPA
 // =======================
-var map = L.map('map').setView([38.7223, -9.1393], 12);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
+var map = L.map('map').setView([38.7223,-9.1393],12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+ attribution:'© OpenStreetMap'
 }).addTo(map);
 
 var marker;
-var lat = null;
-var lng = null;
+var lat=null;
+var lng=null;
 
-// =======================
-// FUNÇÃO PARA ATUALIZAR FORMULÁRIO
-// =======================
-function updateForm(lat, lng) {
-  var formURL = "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"
-                + "&entry.1024839152=" + lat
-                + "&entry.53677719=" + lng;
-
-  document.getElementById("googleForm").src = formURL;
-  document.getElementById("form-container").classList.add("show");
-}
 
 // =======================
 // CLIQUE NO MAPA
 // =======================
-map.on('click', function(e) {
 
-  if(marker) {
-    map.removeLayer(marker);
-  }
+map.on('click',function(e){
 
-  marker = L.marker(e.latlng).addTo(map);
+ if(marker){
+   map.removeLayer(marker);
+ }
 
-  lat = e.latlng.lat.toFixed(6);
-  lng = e.latlng.lng.toFixed(6);
+ marker = L.marker(e.latlng).addTo(map);
 
-  document.getElementById("coords").value = lat + "," + lng;
+ lat = e.latlng.lat.toFixed(6);
+ lng = e.latlng.lng.toFixed(6);
 
-  updateForm(lat, lng);
+ document.getElementById("coords").value = lat + "," + lng;
+
+
+ // =======================
+ // ATUALIZAR FORMULÁRIO AUTOMATICAMENTE
+ // =======================
+
+ var formURL =
+ "https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true"+
+ "&entry.1024839152="+lat+
+ "&entry.53677719="+lng;
+
+ document.getElementById("googleForm").src=formURL;
+
 });
+
 </script>
 
 </body>
