@@ -14,15 +14,6 @@ iframe { width:1000px; height:600px; border:0; }
 </head>
 <body>
 
-<h2>Responda ao questionário</h2>
-
-<iframe id="googleForm"
-src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true">
-A carregar…
-</iframe>
-
-<div id="message"></div>
-
 <h2>Assinale o local a considerar no mapa</h2>
 <p>Clique no mapa para indicar o local.</p>
 
@@ -30,6 +21,15 @@ A carregar…
 
 <p>Coordenadas selecionadas:</p>
 <input id="coords" type="text" readonly>
+
+<div id="message"></div>
+
+<h2>Responda ao questionário</h2>
+
+<iframe id="googleForm"
+src="https://docs.google.com/forms/d/e/1FAIpQLSe75KJzngsSvGPypyHib4Egd1XSce4Mn719bYPZY5ghTPh8Yg/viewform?embedded=true">
+A carregar…
+</iframe>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
